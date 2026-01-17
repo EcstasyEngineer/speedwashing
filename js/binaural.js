@@ -107,9 +107,12 @@ class BinauralEngine {
         if (this.ctx) return;
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Use data URL instead of blob URL for iOS Safari compatibility
-        const dataUrl = 'data:application/javascript;base64,' + btoa(workletCode);
-        await this.ctx.audioWorklet.addModule(dataUrl);
+        // Use blob URL (same as working noise.js)
+        const blob = new Blob([workletCode], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        await this.ctx.audioWorklet.addModule(url);
+        URL.revokeObjectURL(url);
+
         this.node = new AudioWorkletNode(this.ctx, 'binaural-processor', {
             outputChannelCount: [2]
         });
